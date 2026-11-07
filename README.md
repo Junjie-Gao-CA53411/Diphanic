@@ -1,4 +1,3 @@
-# GUMO
-The repo for Language Model - Gumo
+# Diphanic
 
 Good to Meet U.
