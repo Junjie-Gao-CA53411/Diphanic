@@ -1,0 +1,14 @@
+# Ignore virtual environment and VS Code settings
+.venv/
+.vscode/
+
+# Ignore personal notes
+notes.md
+
+# Ignore python cache and compiled files
+__pycache__/
+*.pyc
+
+# Ignore model checkpoints and logs
+ckpt/
+*.pt

@@ -1,0 +1,38 @@
+experiment: EX-001-gpt2-ternary-qat
+
+model: gpt2                      # GPT-2 small (124M)
+dataset: wikitext-2-raw-v1
+
+quant:
+  weight_mode: absmean           # none | absmean | perchannel | learnable
+  delta_coeff: 0.7               # 第三课：高斯≈0.77, 拉普拉斯≈1.01, TWN解析≈0.7
+  quantize_input: true           # int8 absmax 激活量化
+
+groups:                          # keep_fp 覆盖 quantize
+  a_fp:          {quantize: [],                        keep_fp: []}
+  b_all:         {quantize: [q, k, v, o, fc, proj],   keep_fp: []}
+  c_mlp_only:    {quantize: [fc, proj],               keep_fp: []}
+  d_attn_only:   {quantize: [q, k, v, o],             keep_fp: []}
+  e_all_keep_o:  {quantize: [q, k, v, o, fc, proj],   keep_fp: [o]}
+  f_all_keep_qk: {quantize: [q, k, v, o, fc, proj],   keep_fp: [q, k]}
+
+training:
+  lr: 2.0e-5
+  weight_decay: 0.0
+  warmup_steps: 100
+  epochs: 1
+  max_steps: -1                  # 烟雾测试时设 20
+  grad_clip: 1.0
+  bf16: true
+  log_every: 100
+  seeds: [0, 1, 2]
+
+data:
+  max_len: 512
+  stride: 256
+  max_train_samples: -1          # 调试时设 200
+
+eval:
+  max_len: 1024
+  stride: 512
+  max_eval_samples: -1

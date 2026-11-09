@@ -1,0 +1,46 @@
+experiment: EX-002-native-ternary-v0
+
+model:
+  vocab_size: 50257     # v0 沿用 GPT-2 tokenizer 省一步；EX-003 换自训 sentencepiece-8k
+  dim: 384
+  n_layers: 12
+  n_heads: 6
+  n_kv_heads: 2         # GQA 3:1
+  ffn_dim: 1024
+  max_seq_len: 512
+  rope_theta: 500000.0
+  act: relu2
+  use_sub_norm: true
+  tie_weights: true
+  grad_ckpt: false
+
+quant:
+  delta_coeff: 0.7
+
+groups:
+  n_fp:  {weight_mode: none,    quantize_input: false}
+  n_all: {weight_mode: absmean, quantize_input: true}
+
+data:
+  train_bin: R:\Rhea_Work_Space\Diphanic\Tritlab\data\xingchen_train.bin
+  valid_bin: R:\Rhea_Work_Space\Diphanic\Tritlab\data\xingchen_valid.bin
+  seq_len: 512
+
+training:
+  batch_size: 32          # 32 x 512 = 16k tokens/step
+  lr: 2.0e-3              # BitNet 配方：大 lr + 长 warmup
+  schedule: cosine
+  min_lr_ratio: 0.1
+  warmup_steps: 2000
+  max_steps: 6000         # ~1 亿 tokens（TinyStories 的 ~1/5）
+  weight_decay: 0.01
+  grad_clip: 1.0
+  bf16: true
+  amp_dtype: fp16         # Kaggle P100 无 bf16 加速，用 fp16
+  log_every: 100
+  seeds: [0]
+
+eval:
+  max_len: 512
+  stride: 256
+  max_eval_samples: 200
