@@ -12,3 +12,6 @@ __pycache__/
 # Ignore model checkpoints and logs
 ckpt/
 *.pt
+
+# Ignore test.py
+test.py
